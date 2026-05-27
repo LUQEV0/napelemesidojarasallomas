@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solar Weather Station | Bóta Richárd LUQEV0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            background-color: #0f172a;
+            margin: 0;
+            padding: 40px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .slide-container {
+            width: 1280px;
+            height: 720px;
+            background-color: #1e293b;
+            border-radius: 16px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            padding: 60px 80px;
+            position: relative;
+            color: #f8fafc;
+        }
+
+        .slide-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at top right, rgba(16, 185, 129, 0.08), transparent);
+            z-index: 0;
+        }
+
+        .slide-container > * { position: relative; z-index: 1; }
+
+        h1, h2, h3 { font-family: 'Montserrat', sans-serif; margin: 0; }
+        h1 { font-size: 84px; font-weight: 700; color: #10b981; line-height: 1.1; }
+        .slide-title { font-size: 42px; font-weight: 700; margin-bottom: 40px; color: #10b981; border-left: 8px solid #10b981; padding-left: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        h3 { font-size: 32px; margin-bottom: 15px; color: #f1f5f9; }
+        p, li { font-size: 22px; line-height: 1.6; color: #94a3b8; }
+        .subtitle { font-size: 28px; color: #cbd5e1; margin-top: 20px; }
+
+        .content-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; width: 100%; }
+        .two-column { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; width: 100%; align-items: center; }
+        
+        .image-wrapper { border-radius: 20px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); height: 420px; width: 100%; background: #0f172a; }
+        .image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        .tiled-content { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; width: 100%; }
+        .tile { background: rgba(255,255,255,0.03); padding: 40px; border-radius: 24px; border: 1px solid rgba(16, 185, 129, 0.15); text-align: center; }
+        .tile .icon { font-size: 54px; color: #10b981; margin-bottom: 25px; }
+
+        .number-grid { display: flex; justify-content: space-around; align-items: center; width: 100%; }
+        .number-item { text-align: center; }
+        .number-val { font-size: 120px; font-weight: 700; color: #10b981; line-height: 1; }
+        .number-label { font-size: 24px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 2px; }
+
+        .bar-chart { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+        .bar-row { display: flex; align-items: center; gap: 25px; }
+        .bar-label { flex: 0 0 280px; text-align: right; font-weight: 600; font-size: 20px; color: #cbd5e1; }
+        .bar-track { flex-grow: 1; height: 45px; background: #334155; border-radius: 25px; overflow: hidden; }
+        .bar-fill { height: 100%; background: linear-gradient(90deg, #10b981, #059669); display: flex; align-items: center; justify-content: flex-end; padding-right: 20px; color: white; font-weight: 700; font-size: 18px; }
+
+        table { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.02); border-radius: 12px; overflow: hidden; }
+        th { background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 22px; text-align: left; font-size: 22px; border-bottom: 2px solid #10b981; }
+        td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 20px; color: #cbd5e1; }
+
+        .timeline { display: flex; justify-content: space-between; position: relative; margin-top: 80px; }
+        .timeline-line { position: absolute; top: 15px; left: 0; width: 100%; height: 4px; background: #334155; z-index: 0; }
+        .timeline-node { width: 23%; text-align: center; position: relative; z-index: 1; }
+        .timeline-node::before { content: ''; position: absolute; top: 5px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; background: #10b981; border-radius: 50%; border: 5px solid #1e293b; }
+    </style>
+</head>
+<body>
+
+<div class="slide-container" id="slide1">
+    <div class="content-area" style="text-align: center;">
+        <h1 style="letter-spacing: -2px;">IoT Weather<br><span style="color: #f8fafc;">Station Project</span></h1>
+        <div style="width: 140px; height: 8px; background: #10b981; margin: 40px auto;"></div>
+        <p class="subtitle" style="max-width: 900px; margin: 0 auto;">Napelemes energiaellátású, ESP32 alapú meteorológiai állomás és távoli adatgyűjtő rendszer.</p>
+        <div style="margin-top: 100px; font-size: 26px;">
+            <p><strong>Bóta Richárd</strong> | LUQEV0</p>
+            <p style="color: #64748b; font-size: 20px; margin-top: 10px;">Projektmunka 2026</p>
+        </div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide2">
+    <h2 class="slide-title">Projekt Koncepció</h2>
+    <div class="content-area">
+        <div class="two-column">
+            <div class="tile" style="text-align: left;">
+                <h3 style="color: #10b981;"><i class="fa-solid fa-bolt-lightning"></i> A Kihívás</h3>
+                <p>Okyan távoli mérőpontok létrehozása, ahol nincs hálózati áramellátás, de szükség van a folyamatos környezeti adatokra.</p>
+            </div>
+            <div class="tile" style="text-align: left; border-left: 8px solid #10b981;">
+                <h3 style="color: #10b981;"><i class="fa-solid fa-solar-panel"></i> A Megoldás</h3>
+                <p>Napelemes energiabetakarítás kombinálva az ESP32 mélyalvási (Deep Sleep) funkcióival a teljes autonómia érdekében.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide3">
+    <h2 class="slide-title">Energia-menedzsment</h2>
+    <div class="content-area">
+        <div class="number-grid">
+            <div class="number-item">
+                <div class="number-val">10</div>
+                <div class="number-label">µA Alvásban</div>
+            </div>
+            <div class="number-item">
+                <div class="number-val">15</div>
+                <div class="number-label">Perc ciklusidő</div>
+            </div>
+            <div class="number-item">
+                <div class="number-val">3.7</div>
+                <div class="number-label">LiPo Volt</div>
+            </div>
+        </div>
+        <p style="text-align: center; margin-top: 60px; max-width: 1000px; margin-left: auto; margin-right: auto;">A Deep Sleep logika használatával a mérőállomás az idő 99%-ában energiatakarékos módban vár, így a szolár rendszer télen is stabil puffert biztosít.</p>
+    </div>
+</div>
+
+<div class="slide-container" id="slide4">
+    <h2 class="slide-title">Szoftveres Logika</h2>
+    <div class="content-area">
+        <div class="tiled-content">
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-power-off"></i></div>
+                <h3>Ébredés</h3>
+                <p>A belső RTC időzítő 15 percenként felébreszti a processzormagokat.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-database"></i></div>
+                <h3>Mintavétel</h3>
+                <p>Beolvassa az I2C buszról a BME280 adatait és az akku szintet.</p>
+            </div>
+            <div class="tile">
+                <div class="icon"><i class="fa-solid fa-moon"></i></div>
+                <h3>Mélyalvás</h3>
+                <p>Az adatok feldolgozása után a vezérlő azonnal lekapcsolja a perifériáit.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide5">
+    <h2 class="slide-title">Anyagjegyzék (BOM)</h2>
+    <div class="content-area">
+        <table>
+            <thead>
+                <tr>
+                    <th>Komponens</th>
+                    <th>Típus</th>
+                    <th>Darabszám</th>
+                    <th>Feladat a rendszerben</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Mikrokontroller</td>
+                    <td>FireBeetle ESP32</td>
+                    <td>1 db</td>
+                    <td>Központi adatfeldolgozás és vezérlés</td>
+                </tr>
+                <tr>
+                    <td>Környezeti Szenzor</td>
+                    <td>Bosch BME280</td>
+                    <td>1 db</td>
+                    <td>Hőmérséklet, páratartalom és nyomás mérése</td>
+                </tr>
+                <tr>
+                    <td>Primer Energiaforrás</td>
+                    <td>6V 1W Napelem</td>
+                    <td>1 db</td>
+                    <td>Töltési energia biztosítása</td>
+                </tr>
+                <tr>
+                    <td>Energiatároló</td>
+                    <td>3.7V 1000mAh LiPo</td>
+                    <td>1 db</td>
+                    <td>Rendszer tápellátása és pufferelés</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="slide-container" id="slide6">
+    <h2 class="slide-title">Fogyasztási Profilok</h2>
+    <div class="content-area">
+        <div class="bar-chart">
+            <div class="bar-row">
+                <div class="bar-label">Aktív fázis (RF / Wi-Fi)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 100%;">140 mA</div></div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">Aktív fázis (Csak szenzor)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 35%; background: #10b981;">45 mA</div></div>
+            </div>
+            <div class="bar-row">
+                <div class="bar-label">Mélyalvás (Deep Sleep)</div>
+                <div class="bar-track"><div class="bar-fill" style="width: 4%; background: #059669;">0.01 mA</div></div>
+            </div>
+        </div>
+        <p style="margin-top: 40px; text-align: center; color: #64748b; font-style: italic;">A hardveres optimalizáció látványos eredménye az alvó fázis minimális áramfelvétele.</p>
+    </div>
+</div>
+
+<div class="slide-container" id="slide7">
+    <h2 class="slide-title">Fejlesztési Ütemterv</h2>
+    <div class="content-area">
+        <div class="timeline">
+            <div class="timeline-line"></div>
+            <div class="timeline-node">
+                <h3 style="margin-top: 40px; font-size: 24px;">Specifikáció</h3>
+                <p style="font-size: 18px;">Komponensek és energetikai mérleg tervezése.</p>
+            </div>
+            <div class="timeline-node">
+                <h3 style="margin-top: 40px; font-size: 24px;">Prototípus</h3>
+                <p style="font-size: 18px;">I2C áramkörök és hardveres összeépítés.</p>
+            </div>
+            <div class="timeline-node">
+                <h3 style="margin-top: 40px; font-size: 24px;">Szoftver</h3>
+                <p style="font-size: 18px;">Energiatakarékos vezérlőkód megírása.</p>
+            </div>
+            <div class="timeline-node">
+                <h3 style="margin-top: 40px; font-size: 24px;">Validálás</h3>
+                <p style="font-size: 18px;">Laboratóriumi tesztek és repozitórium lezárás.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="slide-container" id="slide8">
+    <div class="content-area" style="text-align: center;">
+        <h2 style="font-size: 70px; margin-bottom: 20px;">Projekt Lezárás</h2>
+        <p class="subtitle" style="margin-top: 10px;">Minden szükséges dokumentáció és forrásfájl feltöltve a távoli tárhelyre.</p>
+        
+        <div style="margin-top: 60px; display: inline-block; background: rgba(16, 185, 129, 0.1); padding: 40px; border-radius: 24px; border: 2px solid #10b981;">
+            <p style="color: #f8fafc; font-size: 24px; margin: 0;"><i class="fa-brands fa-github"></i> <strong>GitHub Repozitórium:</strong> LUQEV0/napelemesidojarasallomas</p>
+            <p style="margin-top: 20px; color: #f8fafc; font-size: 24px; margin-bottom: 0;"><i class="fa-solid fa-user"></i> <strong>Készítette:</strong> Bóta Richárd (LUQEV0)</p>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
